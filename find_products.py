@@ -76,10 +76,10 @@ def tile_clear_image(im_S2,name,where):
     tiles_file.close()
     #Make the mask
     S2_name=S2_short(name)
-    os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json --tiling-output prediction_data -product "+name)
+    os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+name)
     for filename in os.listdir("prediction/"+name):
         if(".png" in filename):
-            mask=Image.open("/home/heido/projects/day_test/prediction/"+name+"/"+filename)
+            mask=Image.open("prediction/"+name+"/"+filename)
     tiles_x=int(im_S2.width/tile_size)
     tiles_y=int(im_S2.height/tile_size)
     for i in range(0,tiles_x):
@@ -166,19 +166,19 @@ for month in active_months:
 for j in range(len(product_list)):
     #Download the propduct:
     if(os.path.isdir("prediction_data/"+product_list[j]+".SAFE")==False):
-        f=open("prediction_data/products.dat","w")
+        f=open("data/products.dat","w")
         f.write(product_list[j])
         f.close()
-        os.system("~/miniconda3/envs/senpy/bin/python /home/heido/cvat-vsm/dias_old/main_engine.py -d prediction_data")
-        os.system("rm prediction_data/products*")
+        os.system("~/miniconda3/envs/senpy/bin/python /home/heido/cvat-vsm/dias_old/main_engine.py -d data")
+        os.system("rm data/products*")
         #Make the .dim file:
-        if(os.path.isdir("prediction_data/"+product_list[j]+".SAFE")==True):
-            input_path="prediction_data/"+product_list[j]+".SAFE/MTD_MSIL2A.xml"
-            output_path="prediction_data/"+product_list[j]+".SAFE/GRANULE/output.dim"
+        if(os.path.isdir("data/"+product_list[j]+".SAFE")==True):
+            input_path="data/"+product_list[j]+".SAFE/MTD_MSIL2A.xml"
+            output_path="data/"+product_list[j]+".SAFE/GRANULE/output.dim"
             line_for_gpt="/snap/snap8/bin/gpt output.xml -Pinput=\""+input_path+"\" -Poutput=\""+output_path+"\""
             os.system(line_for_gpt)
             #Make the RGB image:
-            S2_product=ProductIO.readProduct('prediction_data/'+product_list[j]+'.SAFE/GRANULE/output.dim')
+            S2_product=ProductIO.readProduct('data/'+product_list[j]+'.SAFE/GRANULE/output.dim')
             band_names = S2_product.getBandNames()
             red = S2_product.getBand('B4')
             green = S2_product.getBand('B3')
