@@ -190,7 +190,7 @@ for j in range(len(product_list)):
             where="products/"+product_list[j]
             tile_clear_image(im_S2,product_list[j],where)
             os.system("rm "+product_list[j]+".png")
-            nr_of_tiles=len([name for name in os.listdir(where) if os.path.isfile(os.path.join(DIR, name))])
+            nr_of_tiles=len([name for name in os.listdir(where) if os.path.isfile(os.path.join(where, name))])
             if(nr_of_tiles>75):
                 NDVI_im=product_list[j]+"_NDVI"
                 width = S2_product.getSceneRasterWidth()
