@@ -226,8 +226,8 @@ for j in range(len(product_list)):
                 date_obj = datetime(int(date_str[0:4]),int(date_str[4:6]),int(date_str[6:8]))
                 date_start=date_obj-timedelta(days=8)
                 date_end=date_obj+timedelta(days=2)
-                date_start_str=date_start.year+"-"+date_start.month+"-"+date_start.day
-                date_end_str=date_end.year+"-"+date_end.month+"-"+date_end.day
+                date_start_str=str(date_start.year)+"-"+str(date_start.month)+"-"+str(date_start.day)
+                date_end_str=str(date_end.year)+"-"+str(date_end.month)+"-"+str(date_end.day)
                 list_for_senpy.write(date_start_str+","+date_end_str+"\n")
 
 list_for_senpy.close()
