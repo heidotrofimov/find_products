@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -77,10 +76,10 @@ def tile_clear_image(im_S2,name,where):
     tiles_file.close()
     #Make the mask
     S2_name=S2_short(name)
-    os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+name)
+    os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json --tiling-output prediction_data -product "+name)
     for filename in os.listdir("prediction/"+name):
         if(".png" in filename):
-            mask=Image.open("prediction/"+name+"/"+filename)
+            mask=Image.open("/home/heido/projects/day_test/prediction/"+name+"/"+filename)
     tiles_x=int(im_S2.width/tile_size)
     tiles_y=int(im_S2.height/tile_size)
     for i in range(0,tiles_x):
@@ -140,9 +139,15 @@ def tile_NDVI_image(im_S2,name,where,where_RGB):
             RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
             RGB_tile.save(where+"/"+S2_name+"_"+str(tiles_x)+"_"+str(tiles_y)+".png")
 
-year="2019"
-place="T34UFD"
+year="2020"
+place="T33UUV"
 
+tiles_file=open(place+"_tiles_with_fields.txt","r")
+lines=tiles_file.readlines()
+nr_of_fields=0
+for line in lines:
+    nr_of_fields+=1
+tiles_file.close()
 
 os.system("rm month*.xml")
 current_dir=place+"_"+year
@@ -159,27 +164,27 @@ f.close()
 product_list=[]
 
 for month in active_months:
-    download_xml("S2*MSIL2A*"+year+month+"*"+place+"* AND ( (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 5.0])) ","month_"+month+".xml")
+    download_xml("S2*MSIL2A*"+year+month+"*"+place+"* AND ( (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 75.0])) ","month_"+month+".xml")
     month_list=read_xml("month_"+month+".xml")
     for product in month_list:
         product_list.append(product)
 
 for j in range(len(product_list)):
-    #Download the propduct:
+    #Download the product:
     if(os.path.isdir("prediction_data/"+product_list[j]+".SAFE")==False):
-        f=open("data/products.dat","w")
+        f=open("prediction_data/products.dat","w")
         f.write(product_list[j])
         f.close()
-        os.system("~/miniconda3/envs/senpy/bin/python /home/heido/cvat-vsm/dias_old/main_engine.py -d data")
-        os.system("rm data/products*")
+        os.system("~/miniconda3/envs/senpy/bin/python /home/heido/cvat-vsm/dias_old/main_engine.py -d prediction_data")
+        os.system("rm prediction_data/products*")
         #Make the .dim file:
-        if(os.path.isdir("data/"+product_list[j]+".SAFE")==True):
-            input_path="data/"+product_list[j]+".SAFE/MTD_MSIL2A.xml"
-            output_path="data/"+product_list[j]+".SAFE/GRANULE/output.dim"
+        if(os.path.isdir("prediction_data/"+product_list[j]+".SAFE")==True):
+            input_path="prediction_data/"+product_list[j]+".SAFE/MTD_MSIL2A.xml"
+            output_path="prediction_data/"+product_list[j]+".SAFE/GRANULE/output.dim"
             line_for_gpt="/snap/snap8/bin/gpt output.xml -Pinput=\""+input_path+"\" -Poutput=\""+output_path+"\""
             os.system(line_for_gpt)
             #Make the RGB image:
-            S2_product=ProductIO.readProduct('data/'+product_list[j]+'.SAFE/GRANULE/output.dim')
+            S2_product=ProductIO.readProduct('prediction_data/'+product_list[j]+'.SAFE/GRANULE/output.dim')
             band_names = S2_product.getBandNames()
             red = S2_product.getBand('B4')
             green = S2_product.getBand('B3')
@@ -191,8 +196,8 @@ for j in range(len(product_list)):
             where="products/"+product_list[j]
             tile_clear_image(im_S2,product_list[j],where)
             os.system("rm "+product_list[j]+".png")
-            nr_of_tiles=len([name for name in os.listdir(where) if os.path.isfile(os.path.join(where, name))])
-            if(nr_of_tiles>75):
+            nr_of_tiles=len([name for name in os.listdir(where) if os.path.isfile(os.path.join(DIR, name))])
+            if(nr_of_tiles>0):
                 NDVI_im=product_list[j]+"_NDVI"
                 width = S2_product.getSceneRasterWidth()
                 height = S2_product.getSceneRasterHeight()
@@ -222,12 +227,14 @@ for j in range(len(product_list)):
                 im_S2_NDVI=Image.open(NDVI_im+".png")
                 tile_NDVI_image(im_S2_NDVI,product_list[j],"products/"+product_list[j]+"_NDVI",where)
                 os.system("rm "+NDVI_im+".png")
+            if(nr_of_tiles>75 or nr_of_tiles>=0.4*nr_of_fields):
                 date_str=product_list[j].split("_")[2].split("T")[0]
                 date_obj = datetime(int(date_str[0:4]),int(date_str[4:6]),int(date_str[6:8]))
                 date_start=date_obj-timedelta(days=8)
                 date_end=date_obj+timedelta(days=2)
-                date_start_str=str(date_start.year)+"-"+str(date_start.month)+"-"+str(date_start.day)
-                date_end_str=str(date_end.year)+"-"+str(date_end.month)+"-"+str(date_end.day)
+                date_start_str=date_start.year+"-"+date_start.month+"-"+date_start.day
+                date_end_str=date_end.year+"-"+date_end.month+"-"+date_end.day
                 list_for_senpy.write(date_start_str+","+date_end_str+"\n")
+                os.system("mv products/"+product_list[j]+"* target_products/")
 
 list_for_senpy.close()
