@@ -79,7 +79,7 @@ def tile_clear_image(im_S2,name,where):
     os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+name)
     for filename in os.listdir("prediction/"+name):
         if(".png" in filename):
-            mask=Image.open("/home/heido/projects/day_test/prediction/"+name+"/"+filename)
+            mask=Image.open("/home/heido/projects/find_products/prediction/"+name+"/"+filename)
     tiles_x=int(im_S2.width/tile_size)
     tiles_y=int(im_S2.height/tile_size)
     for i in range(0,tiles_x):
