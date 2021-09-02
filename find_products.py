@@ -228,7 +228,7 @@ for j in range(len(product_list)):
                 im_S2_NDVI=Image.open(NDVI_im+".png")
                 tile_NDVI_image(im_S2_NDVI,product_list[j],"products/"+product_list[j]+"_NDVI",where)
                 os.system("rm "+NDVI_im+".png")
-            if(nr_of_tiles>75 or nr_of_tiles>=0.4*nr_of_fields):
+            if(nr_of_tiles>40 or nr_of_tiles>=0.4*nr_of_fields):
                 date_str=product_list[j].split("_")[2].split("T")[0]
                 date_obj = datetime(int(date_str[0:4]),int(date_str[4:6]),int(date_str[6:8]))
                 date_start=date_obj-timedelta(days=8)
