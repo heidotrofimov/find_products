@@ -17,6 +17,7 @@ from snappy import GPF
 from snappy import HashMap
 from snappy import ProductData
 jpy = snappy.jpy
+import shutil
 ImageManager = jpy.get_type('org.esa.snap.core.image.ImageManager')
 JAI = jpy.get_type('javax.media.jai.JAI')
 
