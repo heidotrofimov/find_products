@@ -172,7 +172,7 @@ for month in active_months:
 
 for j in range(len(product_list)):
     #Download the product:
-    if(os.path.isdir("data/"+product_list[j])==False):
+    if(os.path.isdir("products/"+product_list[j])==False):
         f=open("data/products.dat","w")
         f.write(product_list[j])
         f.close()
