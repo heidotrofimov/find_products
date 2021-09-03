@@ -140,8 +140,8 @@ def tile_NDVI_image(im_S2,name,where,where_RGB):
             RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
             RGB_tile.save(where+"/"+S2_name+"_"+str(tiles_x)+"_"+str(tiles_y)+".png")
 
-year="2020"
-place="T33UUV"
+year="2018"
+place="T33UYU"
 
 tiles_file=open(place+"_tiles_with_fields.txt","r")
 lines=tiles_file.readlines()
@@ -154,7 +154,7 @@ os.system("rm month*.xml")
 current_dir=place+"_"+year
 os.system("mkdir "+current_dir)
 os.system("mkdir "+current_dir+"/clear_images")
-active_months=["11","10","09","08","07"]
+active_months=["11","10","09","08","07","06"]
 
 f=open("login.txt","r")
 lines=f.readlines()
@@ -236,7 +236,8 @@ for j in range(len(product_list)):
                 date_start_str=str(date_start.year)+"-"+str(date_start.month)+"-"+str(date_start.day)
                 date_end_str=str(date_end.year)+"-"+str(date_end.month)+"-"+str(date_end.day)
                 list_for_senpy.write(date_start_str+","+date_end_str+"\n")
-                os.system("mv products/"+product_list[j]+"* target_products/")
+                if(str(date_end.month)!="6"):
+                    os.system("mv products/"+product_list[j]+"* target_products/")
             os.system("rm -r data/*")
 
 list_for_senpy.close()
