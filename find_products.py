@@ -140,8 +140,8 @@ def tile_NDVI_image(im_S2,name,where,where_RGB):
             RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
             RGB_tile.save(where+"/"+S2_name+"_"+str(tiles_x)+"_"+str(tiles_y)+".png")
 
-year="2018"
-place="T33UYU"
+year="2020"
+place="T33UUT"
 
 tiles_file=open(place+"_tiles_with_fields.txt","r")
 lines=tiles_file.readlines()
