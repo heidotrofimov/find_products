@@ -140,8 +140,8 @@ def tile_NDVI_image(im_S2,name,where,where_RGB):
             RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
             RGB_tile.save(where+"/"+S2_name+"_"+str(tiles_x)+"_"+str(tiles_y)+".png")
 
-year="2020"
-place="T32UPG"
+year="2019"
+place="T33UWT"
 
 tiles_file=open(place+"_tiles_with_fields.txt","r")
 lines=tiles_file.readlines()
@@ -152,8 +152,8 @@ tiles_file.close()
 
 os.system("rm month*.xml")
 current_dir=place+"_"+year
-os.system("mkdir "+current_dir)
-os.system("mkdir "+current_dir+"/clear_images")
+#os.system("mkdir "+current_dir)
+#os.system("mkdir "+current_dir+"/clear_images")
 active_months=["11","10","09","08","07","06"]
 
 f=open("login.txt","r")
