@@ -152,8 +152,8 @@ tiles_file.close()
 
 os.system("rm month*.xml")
 current_dir=place+"_"+year
-#os.system("mkdir "+current_dir)
-#os.system("mkdir "+current_dir+"/clear_images")
+os.system("mkdir "+current_dir)
+os.system("mkdir "+current_dir+"/clear_images")
 active_months=["11","10","09","08","07","06"]
 
 f=open("login.txt","r")
