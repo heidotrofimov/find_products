@@ -139,8 +139,8 @@ for product in os.listdir("data"):
   for filename in os.listdir("prediction/"+product.split(".")[0]):
     if(".png" in filename):
         mask_o=Image.open("/home/heido/projects/find_products/prediction/"+product.split(".")[0]+"/"+filename)
-  tiles_x=int(mask.width/tile_size)
-  tiles_y=int(mask.height/tile_size)
+  tiles_x=int(mask_o.width/tile_size)
+  tiles_y=int(mask_o.height/tile_size)
   for i in range(0,tiles_x):
       for j in range(0,tiles_y):
           tile_name=str(i)+"_"+str(j)+".png"
@@ -155,10 +155,10 @@ for product in os.listdir("data"):
                       polluted_pixels+=1 
           if(polluted_pixels/all_pixels*100<=20):
               os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
-  if(mask.width>tiles_x*tile_size):
+  if(mask_o.width>tiles_x*tile_size):
       for j in range(0,tiles_y):
           tile_name=str(tiles_x)+"_"+str(j)+".png"
-          mask_tile=mask_o.crop((tiles_x-tile_size,j*tile_size,mask.width,tile_size*(j+1)))
+          mask_tile=mask_o.crop((tiles_x-tile_size,j*tile_size,mask_o.width,tile_size*(j+1)))
           all_pixels=mask_tile.width*mask_tile.height
           mask=mask_tile.load()
           mask_array=np.array(mask_tile,dtype=np.float)
@@ -169,10 +169,10 @@ for product in os.listdir("data"):
                       polluted_pixels+=1 
           if(polluted_pixels/all_pixels*100<=20):
               os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
-  if(mask.height>tiles_y*tile_size):
+  if(mask_o.height>tiles_y*tile_size):
       for i in range(0,tiles_x):
           tile_name=str(tiles_x)+"_"+str(tiles_y)+".png"
-          mask_tile=mask_o.crop((i*tile_size,mask.height-tile_size,tile_size*(i+1),mask.height))
+          mask_tile=mask_o.crop((i*tile_size,mask_o.height-tile_size,tile_size*(i+1),mask_o.height))
           all_pixels=mask_tile.width*mask_tile.height
           mask=mask_tile.load()
           mask_array=np.array(mask_tile,dtype=np.float)
