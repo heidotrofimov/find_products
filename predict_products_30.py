@@ -1,0 +1,155 @@
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+import os
+import shutil
+from datetime import datetime
+import argparse
+
+def check_data(img):
+  img_o=img
+  img=img.load()
+  for i in range(img_o.width):
+    for j in range(img_o.height):
+      if(img[i,j][3]==0):
+        return False
+  return True
+
+def S2_short(S2_full):
+    S2=S2_full.split(".")[0].split("_")
+    return S2[0]+"_"+S2[2]+"_"+S2[5]
+
+for safe in os.listdir("products"):
+    if("SAFE" in safe):
+        nodim=True
+        for filename in os.listdir("products/"+safe+"/GRANULE"):
+            if(".dim" in filename):
+                nodim=False
+        if(nodim):
+            input_path="products/"+safe+"/MTD_MSIL2A.xml"
+            output_path="products/"+safe+"/GRANULE/output.dim"
+            line_for_gpt="/snap/snap8/bin/gpt output.xml -Pinput=\""+input_path+"\" -Poutput=\""+output_path+"\""
+            os.system(line_for_gpt)
+
+sys.path.append('/home/heido/jpy/build/lib.linux-x86_64-3.6')
+sys.path.append('/home/heido/.snap/snap-python')
+import snappy
+from snappy import ProductIO
+from snappy import ProductUtils
+from snappy import ProgressMonitor
+from snappy import Product
+from snappy import FlagCoding
+from snappy import GPF
+from snappy import HashMap
+from snappy import ProductData
+jpy = snappy.jpy
+ImageManager = jpy.get_type('org.esa.snap.core.image.ImageManager')
+JAI = jpy.get_type('javax.media.jai.JAI')
+
+tile_size=512
+
+def write_rgb_image(bands, filename, format):
+    image_info = ProductUtils.createImageInfo(bands, True, ProgressMonitor.NULL)
+    im = ImageManager.getInstance().createColoredBandImage(bands, image_info, 0)
+    JAI.create("filestore", im, filename, format)
+    
+def write_image(band, filename, format):
+    im = ImageManager.getInstance().createColoredBandImage([band], band.getImageInfo(), 0)
+    JAI.create("filestore", im, filename, format)
+    
+
+for S2_SAFE in os.listdir('products'):
+    RGB_im=S2_SAFE.split(".")[0]
+    AOI=S2_SAFE.split("_")[5]
+    if(os.path.isfile("products/"+RGB_im+".png")==False):
+        S2_product=ProductIO.readProduct('products/'+S2_SAFE+'/GRANULE/output.dim')
+        band_names = S2_product.getBandNames()
+        red = S2_product.getBand('B4')
+        green = S2_product.getBand('B3')
+        blue = S2_product.getBand('B2')
+        write_rgb_image([red, green, blue], RGB_im+".png", 'png')
+        shutil.move(RGB_im+".png",'products/')
+    
+
+#AOI="T34UFG"
+'''
+tiles_of_interest=[]
+tiles_file=open(AOI+"_tiles_with_fields.txt","r")
+lines=tiles_file.readlines()
+for line in lines:
+    tiles_of_interest.append(line.rstrip())
+tiles_file.close()
+'''
+
+
+
+for RGB_im in os.listdir("products"):
+  if(".png" in RGB_im):
+      print(RGB_im)
+      name=RGB_im.split(".")[0]
+      AOI=name.split("_")[5]
+      name_check=S2_short(RGB_im)
+
+      os.mkdir("products/"+name)
+      im_S2 = Image.open("products/"+RGB_im)
+
+      tiles_x=int(im_S2.width/tile_size)
+      tiles_y=int(im_S2.height/tile_size)
+      for i in range(0,tiles_x):
+        for j in range(0,tiles_y):
+            #if(str(i)+"_"+str(j) in tiles_of_interest):
+            if(True):
+              RGB_tile=im_S2.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
+              if(check_data(RGB_tile)):
+                RGB_tile.save("products/"+name+"/"+str(i)+"_"+str(j)+".png")
+      if(im_S2.width>tiles_x*tile_size):
+        for j in range(0,tiles_y):
+            #if(str(tiles_x)+"_"+str(j) in tiles_of_interest):
+            if(True):
+              RGB_tile=im_S2.crop((im_S2.width-tile_size,j*tile_size,im_S2.width,tile_size*(j+1)))
+              if(check_data(RGB_tile)):
+                RGB_tile.save("products/"+name+"/"+str(tiles_x)+"_"+str(j)+".png")
+      if(im_S2.height>tiles_y*tile_size):
+        for i in range(0,tiles_x):
+            #if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
+            if(True):
+              RGB_tile=im_S2.crop((i*tile_size,im_S2.height-tile_size,tile_size*(i+1),im_S2.height))
+              if(check_data(RGB_tile)):
+                RGB_tile.save("products/"+name+"/"+str(i)+"_"+str(tiles_y)+".png")
+      if(im_S2.height>tiles_y*tile_size and im_S2.width>tiles_x*tile_size):
+          #if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
+          if(True):
+            RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
+            if(check_data(RGB_tile)):
+                RGB_tile.save("products/"+name+"/"+str(tiles_x)+"_"+str(tiles_y)+".png")
+                
+os.system("mv products/*.SAFE data/")
+
+#Predicted images to checked_products                
+
+for product in os.listdir("data"):
+  os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+product.split(".")[0])
+  os.system("mkdir checked_products/"+product.split(".")[0])
+  for filename in os.listdir("prediction/"+product.split(".")[0]):
+    if(".png" in filename):
+        mask=Image.open("/home/heido/projects/find_products/prediction/"+product.split(".")[0]+"/"+filename)
+    tiles_x=int(mask.width/tile_size)
+    tiles_y=int(mask.height/tile_size)
+    for i in range(0,tiles_x):
+        for j in range(0,tiles_y):
+            tile_name=str(i)+"_"+str(j)+".png"
+            mask_tile=mask.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
+            all_pixels=mask_tile.width*mask_tile.height
+            mask=mask_tile.load()
+            mask_array=np.array(mask_tile,dtype=np.float)
+            polluted_pixels=0
+            for k in range(mask_tile.width):
+                for m in range(mask_tile.height):
+                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                        polluted_pixels+=1 
+            if(polluted_pixels/all_pixels*100<=20):
+                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+ 
+  
+  
