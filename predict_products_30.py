@@ -7,6 +7,8 @@ import shutil
 from datetime import datetime
 import argparse
 
+tile_size=512
+
 def check_data(img):
   img_o=img
   img=img.load()
