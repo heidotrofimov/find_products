@@ -19,7 +19,7 @@ def check_data(img):
 def S2_short(S2_full):
     S2=S2_full.split(".")[0].split("_")
     return S2[0]+"_"+S2[2]+"_"+S2[5]
-
+'''
 for safe in os.listdir("products"):
     if("SAFE" in safe):
         nodim=True
@@ -127,59 +127,60 @@ for RGB_im in os.listdir("products"):
                 RGB_tile.save("products/"+name+"/"+str(tiles_x)+"_"+str(tiles_y)+".png")
                 
 os.system("mv products/*.SAFE data/")
-
+'''
 #Predicted images to checked_products                
 
 for product in os.listdir("data"):
-  os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+product.split(".")[0])
+  if(os.path.isdir('prediction/'+product.split(".")[0])==False):
+    os.system("~/miniconda3/envs/cm_predict/bin/python cm_predict.py -c config/config_example.json -product "+product.split(".")[0])
   os.system("mkdir checked_products/"+product.split(".")[0])
   for filename in os.listdir("prediction/"+product.split(".")[0]):
     if(".png" in filename):
         mask=Image.open("/home/heido/projects/find_products/prediction/"+product.split(".")[0]+"/"+filename)
-    tiles_x=int(mask.width/tile_size)
-    tiles_y=int(mask.height/tile_size)
-    for i in range(0,tiles_x):
-        for j in range(0,tiles_y):
-            tile_name=str(i)+"_"+str(j)+".png"
-            mask_tile=mask.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
-            all_pixels=mask_tile.width*mask_tile.height
-            mask=mask_tile.load()
-            mask_array=np.array(mask_tile,dtype=np.float)
-            polluted_pixels=0
-            for k in range(mask_tile.width):
-                for m in range(mask_tile.height):
-                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
-                        polluted_pixels+=1 
-            if(polluted_pixels/all_pixels*100<=20):
-                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
-    if(mask.width>tiles_x*tile_size):
-        for j in range(0,tiles_y):
-            tile_name=str(tiles_x)+"_"+str(j)+".png"
-            mask_tile=mask.crop((tiles_x-tile_size,j*tile_size,mask.width,tile_size*(j+1)))
-            all_pixels=mask_tile.width*mask_tile.height
-            mask=mask_tile.load()
-            mask_array=np.array(mask_tile,dtype=np.float)
-            polluted_pixels=0
-            for k in range(mask_tile.width):
-                for m in range(mask_tile.height):
-                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
-                        polluted_pixels+=1 
-            if(polluted_pixels/all_pixels*100<=20):
-                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
-    if(mask.height>tiles_y*tile_size):
-        for i in range(0,tiles_x):
-            tile_name=str(tiles_x)+"_"+str(tiles_y)+".png"
-            mask_tile=mask.crop((i*tile_size,mask.height-tile_size,tile_size*(i+1),mask.height))
-            all_pixels=mask_tile.width*mask_tile.height
-            mask=mask_tile.load()
-            mask_array=np.array(mask_tile,dtype=np.float)
-            polluted_pixels=0
-            for k in range(mask_tile.width):
-                for m in range(mask_tile.height):
-                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
-                        polluted_pixels+=1 
-            if(polluted_pixels/all_pixels*100<=20):
-                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+  tiles_x=int(mask.width/tile_size)
+  tiles_y=int(mask.height/tile_size)
+  for i in range(0,tiles_x):
+      for j in range(0,tiles_y):
+          tile_name=str(i)+"_"+str(j)+".png"
+          mask_tile=mask.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
+          all_pixels=mask_tile.width*mask_tile.height
+          mask=mask_tile.load()
+          mask_array=np.array(mask_tile,dtype=np.float)
+          polluted_pixels=0
+          for k in range(mask_tile.width):
+              for m in range(mask_tile.height):
+                  if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                      polluted_pixels+=1 
+          if(polluted_pixels/all_pixels*100<=20):
+              os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+  if(mask.width>tiles_x*tile_size):
+      for j in range(0,tiles_y):
+          tile_name=str(tiles_x)+"_"+str(j)+".png"
+          mask_tile=mask.crop((tiles_x-tile_size,j*tile_size,mask.width,tile_size*(j+1)))
+          all_pixels=mask_tile.width*mask_tile.height
+          mask=mask_tile.load()
+          mask_array=np.array(mask_tile,dtype=np.float)
+          polluted_pixels=0
+          for k in range(mask_tile.width):
+              for m in range(mask_tile.height):
+                  if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                      polluted_pixels+=1 
+          if(polluted_pixels/all_pixels*100<=20):
+              os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+  if(mask.height>tiles_y*tile_size):
+      for i in range(0,tiles_x):
+          tile_name=str(tiles_x)+"_"+str(tiles_y)+".png"
+          mask_tile=mask.crop((i*tile_size,mask.height-tile_size,tile_size*(i+1),mask.height))
+          all_pixels=mask_tile.width*mask_tile.height
+          mask=mask_tile.load()
+          mask_array=np.array(mask_tile,dtype=np.float)
+          polluted_pixels=0
+          for k in range(mask_tile.width):
+              for m in range(mask_tile.height):
+                  if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                      polluted_pixels+=1 
+          if(polluted_pixels/all_pixels*100<=20):
+              os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
  
   
   
