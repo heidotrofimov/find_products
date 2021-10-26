@@ -153,7 +153,7 @@ for product in os.listdir("data"):
               for m in range(mask_tile.height):
                   if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
                       polluted_pixels+=1 
-          if(polluted_pixels/all_pixels*100<=20):
+          if(polluted_pixels/all_pixels*100<=7):
               os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
   if(mask_o.width>tiles_x*tile_size):
       for j in range(0,tiles_y):
@@ -167,7 +167,7 @@ for product in os.listdir("data"):
               for m in range(mask_tile.height):
                   if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
                       polluted_pixels+=1 
-          if(polluted_pixels/all_pixels*100<=20):
+          if(polluted_pixels/all_pixels*100<=7):
               os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
   if(mask_o.height>tiles_y*tile_size):
       for i in range(0,tiles_x):
@@ -181,7 +181,7 @@ for product in os.listdir("data"):
               for m in range(mask_tile.height):
                   if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
                       polluted_pixels+=1 
-          if(polluted_pixels/all_pixels*100<=20):
+          if(polluted_pixels/all_pixels*100<=7):
               os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
  
   
