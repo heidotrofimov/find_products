@@ -73,14 +73,17 @@ for S2_SAFE in os.listdir('products'):
     
 
 #AOI="T34UFG"
-'''
+
+for product in os.listdir("products"):
+  AOI=product.split("_")[5]
+
 tiles_of_interest=[]
 tiles_file=open(AOI+"_tiles_with_fields.txt","r")
 lines=tiles_file.readlines()
 for line in lines:
     tiles_of_interest.append(line.rstrip())
 tiles_file.close()
-'''
+
 
 
 
@@ -98,28 +101,27 @@ for RGB_im in os.listdir("products"):
       tiles_y=int(im_S2.height/tile_size)
       for i in range(0,tiles_x):
         for j in range(0,tiles_y):
-            #if(str(i)+"_"+str(j) in tiles_of_interest):
-            if(True):
+            if(str(i)+"_"+str(j) in tiles_of_interest):
               RGB_tile=im_S2.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
               if(check_data(RGB_tile)):
                 RGB_tile.save("products/"+name+"/"+str(i)+"_"+str(j)+".png")
       if(im_S2.width>tiles_x*tile_size):
         for j in range(0,tiles_y):
-            #if(str(tiles_x)+"_"+str(j) in tiles_of_interest):
-            if(True):
+            if(str(tiles_x)+"_"+str(j) in tiles_of_interest):
+
               RGB_tile=im_S2.crop((im_S2.width-tile_size,j*tile_size,im_S2.width,tile_size*(j+1)))
               if(check_data(RGB_tile)):
                 RGB_tile.save("products/"+name+"/"+str(tiles_x)+"_"+str(j)+".png")
       if(im_S2.height>tiles_y*tile_size):
         for i in range(0,tiles_x):
-            #if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
-            if(True):
+            if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
+            
               RGB_tile=im_S2.crop((i*tile_size,im_S2.height-tile_size,tile_size*(i+1),im_S2.height))
               if(check_data(RGB_tile)):
                 RGB_tile.save("products/"+name+"/"+str(i)+"_"+str(tiles_y)+".png")
       if(im_S2.height>tiles_y*tile_size and im_S2.width>tiles_x*tile_size):
-          #if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
-          if(True):
+          if(str(i)+"_"+str(tiles_y) in tiles_of_interest):
+          
             RGB_tile=im_S2.crop((im_S2.width-tile_size,im_S2.height-tile_size,im_S2.width,im_S2.height))
             if(check_data(RGB_tile)):
                 RGB_tile.save("products/"+name+"/"+str(tiles_x)+"_"+str(tiles_y)+".png")
@@ -140,6 +142,34 @@ for product in os.listdir("data"):
         for j in range(0,tiles_y):
             tile_name=str(i)+"_"+str(j)+".png"
             mask_tile=mask.crop((i*tile_size,j*tile_size,tile_size*(i+1),tile_size*(j+1)))
+            all_pixels=mask_tile.width*mask_tile.height
+            mask=mask_tile.load()
+            mask_array=np.array(mask_tile,dtype=np.float)
+            polluted_pixels=0
+            for k in range(mask_tile.width):
+                for m in range(mask_tile.height):
+                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                        polluted_pixels+=1 
+            if(polluted_pixels/all_pixels*100<=20):
+                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+    if(mask.width>tiles_x*tile_size):
+        for j in range(0,tiles_y):
+            tile_name=str(tiles_x)+"_"+str(j)+".png"
+            mask_tile=mask.crop((tiles_x-tile_size,j*tile_size,mask.width,tile_size*(j+1)))
+            all_pixels=mask_tile.width*mask_tile.height
+            mask=mask_tile.load()
+            mask_array=np.array(mask_tile,dtype=np.float)
+            polluted_pixels=0
+            for k in range(mask_tile.width):
+                for m in range(mask_tile.height):
+                    if(mask[k,m][0]==255 or mask[k,m][0]==192 or mask[k,m][0]==129):
+                        polluted_pixels+=1 
+            if(polluted_pixels/all_pixels*100<=20):
+                os.system("cp products/"+product.split(".")[0]+"/"+tile_name+" checked_products/"+product.split(".")[0]+"/")
+    if(mask.height>tiles_y*tile_size):
+        for i in range(0,tiles_x):
+            tile_name=str(tiles_x)+"_"+str(tiles_y)+".png"
+            mask_tile=mask.crop((i*tile_size,mask.height-tile_size,tile_size*(i+1),mask.height))
             all_pixels=mask_tile.width*mask_tile.height
             mask=mask_tile.load()
             mask_array=np.array(mask_tile,dtype=np.float)
